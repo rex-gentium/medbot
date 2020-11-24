@@ -19,6 +19,7 @@ class State(Base):
 class Medication(Base):
     __tablename__ = 'medication'
     id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     name = Column(String, unique=True, nullable=False)
 
 
@@ -31,6 +32,7 @@ class Prescription(Base):
     end_date = Column(Date)
     dose = Column(Integer, nullable=False)
     prescription_type = Column(String, nullable=False)
+    event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
     time_delta = Column(Interval)
 
 
@@ -42,9 +44,8 @@ class SpecialCondition(Base):
 
 class PrescriptionConditions(Base):
     __tablename__ = 'prescription_conditions'
-    id = Column(Integer, primary_key=True)
-    prescription_id = Column(Integer, ForeignKey('prescription.id'), nullable=False)
-    condition_id = Column(Integer, ForeignKey('special_condition.id'), nullable=False)
+    prescription_id = Column(Integer, ForeignKey('prescription.id'), primary_key=True, nullable=False)
+    condition_id = Column(Integer, ForeignKey('special_condition.id'), primary_key=True, nullable=False)
 
 
 class Event(Base):
