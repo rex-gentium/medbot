@@ -10,6 +10,14 @@ create table state (
     id bigserial primary key,
     name text unique not null,
 );
+insert into state (name) values
+    ('add_medication_enter_name'),
+    ('add_prescription_select_medication'),
+    ('add_prescription_enter_start_date'),
+    ('add_prescription_enter_end_date'),
+    ('add_prescription_select_event'),
+    ('add_prescription_enter_time'),
+    ('add_prescription_enter_conditions');
 
 /* Пользователь */
 create table user (
@@ -61,14 +69,24 @@ create index prescription_end_date_idx on prescription(end_date);
 /* Справочник: События */
 create table event (
     id bigserial primary key,
-    name text unique not null
+    name text unique not null,
+    rank int not null
 );
+insert into event (id, rank, name) values
+    (1, 0, 'утром'),
+    (2, 1, 'завтрак'),
+    (3, 2, 'обед'),
+    (4, 3, 'ужин'),
+    (5, 4, 'на ночь');
 
 /* Справочник: Особое условие */
 create table special_condition (
     id bigserial primary key,
     name text unique not null
-)
+);
+insert into special_condition (id, name) values
+    (1, 'по чётным дням'),
+    (2, 'по нечётным дням');
 
 /* Связка: Расписание приёма - Особое условие */
 create table prescription_conditions (
