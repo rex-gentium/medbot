@@ -13,6 +13,7 @@ create table state (
 insert into state (name) values
     ('add_medication_enter_name'),
     ('add_prescription_select_medication'),
+    ('add_prescription_enter_dose'),
     ('add_prescription_enter_start_date'),
     ('add_prescription_enter_end_date'),
     ('add_prescription_select_event'),
