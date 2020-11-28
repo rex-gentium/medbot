@@ -8,7 +8,7 @@ create database medbot with owner medbot;
 /* Справочник: Состояние конечного автомата */
 create table state (
     id bigserial primary key,
-    name text unique not null,
+    name text unique not null
 );
 insert into state (name) values
     ('add_medication_enter_name'),
@@ -21,13 +21,13 @@ insert into state (name) values
     ('add_prescription_enter_conditions');
 
 /* Пользователь */
-create table user (
+create table "user" (
     id bigserial primary key,
     state_id bigint,
     constraint fk_user_state
         foreign key(state_id)
             references state(id)
-            on delete set null;
+            on delete set null
 );
 create index user_state_idx on "user"(state_id);
 
@@ -38,8 +38,8 @@ create table medication (
     name text unique not null,
     constraint fk_medication_user
         foreign key(user_id)
-            references user(id)
-            on delete cascade;
+            references "user"(id)
+            on delete cascade
 );
 create index medication_user_idx on medication(user_id);
 
@@ -55,12 +55,12 @@ create table prescription (
     time_delta interval,
     constraint fk_prescription_user
         foreign key(user_id)
-            references user(id)
-            on delete cascade;
+            references "user"(id)
+            on delete cascade,
     constraint fk_prescription_medication
         foreign key(medication_id)
             references medication(id)
-            on delete cascade;
+            on delete cascade
 );
 create index prescription_user_idx on prescription(user_id);
 create index prescription_medication_idx on prescription(medication_id);
@@ -97,11 +97,11 @@ create table prescription_conditions (
     constraint fk_prescription_conditions_prescription
         foreign key(prescription_id)
             references prescription(id)
-            on delete cascade;
-            constraint fk_prescription_conditions_condition
+            on delete cascade,
+    constraint fk_prescription_conditions_condition
         foreign key(condition_id)
             references special_condition(id)
-            on delete cascade;
+            on delete cascade
 );
 create index prescription_conditions_prescription_idx on prescription_conditions(prescription_id);
 create index prescription_conditions_condition_idx on prescription_conditions(condition_id);

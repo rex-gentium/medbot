@@ -49,5 +49,6 @@ class PrescriptionConditions(Base):
 
 
 class Event(Base):
+    __tablename__ = 'event'
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)
