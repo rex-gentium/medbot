@@ -10,20 +10,21 @@ create table state (
     id bigserial primary key,
     name text unique not null
 );
-insert into state (name) values
-    ('add_medication_enter_name'),
-    ('add_prescription_select_medication'),
-    ('add_prescription_enter_dose'),
-    ('add_prescription_enter_start_date'),
-    ('add_prescription_enter_end_date'),
-    ('add_prescription_select_event'),
-    ('add_prescription_enter_time'),
-    ('add_prescription_enter_conditions');
+insert into state (id, name) values
+    (1, 'add_medication_enter_name'),
+    (2, 'add_prescription_select_medication'),
+    (3, 'add_prescription_enter_dose'),
+    (4, 'add_prescription_enter_start_date'),
+    (5, 'add_prescription_enter_end_date'),
+    (6, 'add_prescription_select_event'),
+    (7, 'add_prescription_enter_time'),
+    (8, 'add_prescription_enter_conditions');
 
 /* Пользователь */
 create table "user" (
     id bigserial primary key,
     state_id bigint,
+    session_data jsonb not null default '{}'::jsonb,
     constraint fk_user_state
         foreign key(state_id)
             references state(id)
@@ -35,7 +36,7 @@ create index user_state_idx on "user"(state_id);
 create table medication (
     id bigserial primary key,
     user_id bigint not null,
-    name text unique not null,
+    name text not null,
     constraint fk_medication_user
         foreign key(user_id)
             references "user"(id)

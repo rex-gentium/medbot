@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Date, Interval, ForeignKey
+from sqlalchemy import Column, Integer, String, Date, Interval, ForeignKey, JSON
 
 Base = declarative_base()
 
@@ -8,6 +8,7 @@ class User(Base):
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
     state_id = Column(Integer, ForeignKey('state.id'), default=None)
+    session_data = Column(JSON, nullable=False)
 
 
 class State(Base):
