@@ -32,7 +32,6 @@ class Prescription(Base):
     start_date = Column(Date)
     end_date = Column(Date)
     dose = Column(Integer, nullable=False)
-    prescription_type = Column(String, nullable=False)
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
     time_delta = Column(Interval)
 

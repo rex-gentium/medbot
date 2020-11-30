@@ -52,7 +52,7 @@ create table prescription (
     start_date date,
     end_date date,
     dose int not null default 1,
-    prescription_type text,
+    event_id bigint not null,
     time_delta interval,
     constraint fk_prescription_user
         foreign key(user_id)
@@ -61,10 +61,15 @@ create table prescription (
     constraint fk_prescription_medication
         foreign key(medication_id)
             references medication(id)
+            on delete cascade,
+    constraint fk_prescription_event
+        foreign key(event_id)
+            references event(id)
             on delete cascade
 );
 create index prescription_user_idx on prescription(user_id);
 create index prescription_medication_idx on prescription(medication_id);
+create index prescription_event_idx on prescription(event_id);
 create index prescription_start_date_idx on prescription(start_date);
 create index prescription_end_date_idx on prescription(end_date);
 
