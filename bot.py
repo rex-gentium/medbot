@@ -10,6 +10,7 @@ from dbworker import DbWorker
 from settings import *
 from state import State
 from telebot_calendar import CallbackData
+from collections import defaultdict
 
 logging.basicConfig(filename='medbot.log', level=logging.DEBUG)
 bot = telebot.TeleBot(bot_token)
@@ -36,7 +37,8 @@ def cmd_start(message):
     reply = f"{greeting}, {user_name}! Вот список моих команд:\n" \
             f"/start\n" \
             f"/addmedication\n" \
-            f"/addprescription"
+            f"/addprescription\n" \
+            f"/today"
     bot.send_message(user_id, reply)
 
 
@@ -91,9 +93,12 @@ def user_entered_dose(message):
     user_id = message.chat.id
     if message.text.isdigit():
         dose = int(message.text)
-        dbworker.add_to_session_data(user_id, {"dose": dose})
-        dbworker.set_user_state(user_id, State.ADD_PRESCR_ENTER_START_DATE)
-        send_enter_start_date(user_id)
+        if dose <= 0:
+            bot.send_message(user_id, "Число должно быть больше 0")
+        else:
+            dbworker.add_to_session_data(user_id, {"dose": dose})
+            dbworker.set_user_state(user_id, State.ADD_PRESCR_ENTER_START_DATE)
+            send_enter_start_date(user_id)
     else:
         bot.send_message(user_id, "Сообщение не удается распознать как целое число")
 
@@ -216,14 +221,14 @@ def parse_interval(time_str):
 
 
 @bot.message_handler(func=lambda message: dbworker.get_user_state(message.chat.id) == State.ADD_PRESCR_ENTER_CONDITIONS)
-def user_entered_time(message):
+def user_entered_conditions(message):
     user_id = message.chat.id
     user_text = message.text
     if user_text == '0':
         bot.send_message(user_id, "Особых условий не будет")
     conditions = dbworker.get_conditions()
     condition_ids = set([c[0] for c in conditions])
-    user_condition_ids = user_text.split(' ')
+    user_condition_ids = [int(uc_id_str) for uc_id_str in user_text.split(' ')]
     filtered_condition_ids = [uc_id for uc_id in user_condition_ids if uc_id in condition_ids]
     if filtered_condition_ids:
         dbworker.add_to_session_data(user_id, {'condition_ids': filtered_condition_ids})
@@ -244,10 +249,30 @@ def construct_prescription(user_id):
     time_delta_seconds = session_data.get('time_delta_seconds')
     if time_delta_days and time_delta_seconds:
         time_delta = datetime.timedelta(days=time_delta_days, seconds=time_delta_seconds)
+    condition_ids = session_data.get('condition_ids')
     dbworker.add_prescription(user_id, session_data['medication_id'], start_date, end_date, session_data['dose'],
-                              session_data.get('event_id'), time_delta)
+                              session_data.get('event_id'), time_delta, condition_ids)
     bot.send_message(user_id, "Создано правило")
     dbworker.clear_session_data(user_id)
+
+
+@bot.message_handler(commands=["today"])
+def cmd_today_prescriptions(message):
+    user_id = message.chat.id
+    logger.debug(f"Received today command from user {user_id}")
+    today = datetime.datetime.now().date()
+    prescriptions = dbworker.get_prescriptions_for_day(user_id, today)
+    reply = ""
+    grouped_by_event = defaultdict(list)
+    for p in prescriptions:
+        grouped_by_event[p.event_id].append(p)
+    event_map = dict([(e[0], e[1]) for e in dbworker.get_events()])
+    for event_id in grouped_by_event:
+        reply += f"*{event_map[event_id].capitalize()}:*\n"
+        lines = [str(p) for p in grouped_by_event[event_id]]
+        reply += "\n".join(lines)
+        reply += "\n"
+    bot.send_message(user_id, f"Расписание на {today.strftime(date_format)}\n" + reply, parse_mode='Markdown')
 
 
 if __name__ == '__main__':

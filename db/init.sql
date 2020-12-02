@@ -52,7 +52,7 @@ create table prescription (
     start_date date,
     end_date date,
     dose int not null default 1,
-    event_id bigint not null,
+    event_id bigint,
     time_delta interval,
     constraint fk_prescription_user
         foreign key(user_id)
