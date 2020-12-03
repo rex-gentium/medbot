@@ -44,6 +44,19 @@ create table medication (
 );
 create index medication_user_idx on medication(user_id);
 
+/* Справочник: События */
+create table event (
+    id bigserial primary key,
+    name text unique not null,
+    rank int not null
+);
+insert into event (id, rank, name) values
+    (1, 0, 'утром'),
+    (2, 1, 'завтрак'),
+    (3, 2, 'обед'),
+    (4, 3, 'ужин'),
+    (5, 4, 'на ночь');
+
 /* Расписание приёма препарата на какой-либо период */
 create table prescription (
     id bigserial primary key,
@@ -72,19 +85,6 @@ create index prescription_medication_idx on prescription(medication_id);
 create index prescription_event_idx on prescription(event_id);
 create index prescription_start_date_idx on prescription(start_date);
 create index prescription_end_date_idx on prescription(end_date);
-
-/* Справочник: События */
-create table event (
-    id bigserial primary key,
-    name text unique not null,
-    rank int not null
-);
-insert into event (id, rank, name) values
-    (1, 0, 'утром'),
-    (2, 1, 'завтрак'),
-    (3, 2, 'обед'),
-    (4, 3, 'ужин'),
-    (5, 4, 'на ночь');
 
 /* Справочник: Особое условие */
 create table special_condition (
